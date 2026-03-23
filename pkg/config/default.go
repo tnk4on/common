@@ -321,8 +321,9 @@ func defaultMachineConfig() MachineConfig {
 		Image:   "",
 		Memory:  2048,
 		User:    getDefaultMachineUser(),
-		Volumes: attributedstring.NewSlice(getDefaultMachineVolumes()),
-		Rosetta: true,
+		Volumes:      attributedstring.NewSlice(getDefaultMachineVolumes()),
+		FEXCodeCache: true,
+		FEXEmu:       true,
 	}
 }
 
