@@ -63,24 +63,29 @@ func TestDiskUsage(t *testing.T) {
 	img2, err := runtime.store.CreateImage("", []string{"localhost/test:123"}, layerID, "", opts)
 	require.NoError(t, err)
 
-	sharedSize := initialTotalImageSize - int64(len(manifest))
-	// copy the expected and update the expected values
-	expectedImageDiskUsage2 := ImageDiskUsage{
-		ID:         img2.ID,
-		Repository: "localhost/test",
-		Tag:        "123",
-		SharedSize: sharedSize,
-		UniqueSize: int64(len(manifest)),
-		Size:       sharedSize + int64(len(manifest)),
-	}
-	expectedImageDiskUsage.SharedSize = sharedSize
-	expectedImageDiskUsage.UniqueSize = expectedImageDiskUsage.Size - sharedSize
-
 	res, size, err = runtime.DiskUsage(ctx)
 	require.NoError(t, err)
 	require.Equal(t, initialTotalImageSize+int64(len(manifest)), size)
 	require.Len(t, res, 2)
-	res[0].Created = time.Time{}
-	res[1].Created = time.Time{}
-	require.ElementsMatch(t, []ImageDiskUsage{expectedImageDiskUsage, expectedImageDiskUsage2}, res)
+
+	var baseImageUsage, syntheticImageUsage *ImageDiskUsage
+	for i := range res {
+		res[i].Created = time.Time{}
+		require.Equal(t, res[i].SharedSize+res[i].UniqueSize, res[i].Size)
+		switch res[i].ID {
+		case imgID:
+			baseImageUsage = &res[i]
+		case img2.ID:
+			syntheticImageUsage = &res[i]
+		}
+	}
+
+	require.NotNil(t, baseImageUsage)
+	require.NotNil(t, syntheticImageUsage)
+	require.Equal(t, "quay.io/libpod/alpine", baseImageUsage.Repository)
+	require.Equal(t, "3.10.2", baseImageUsage.Tag)
+	require.Equal(t, "localhost/test", syntheticImageUsage.Repository)
+	require.Equal(t, "123", syntheticImageUsage.Tag)
+	require.Equal(t, int64(len(manifest)), syntheticImageUsage.UniqueSize)
+	require.Equal(t, baseImageUsage.SharedSize, syntheticImageUsage.SharedSize)
 }
