@@ -16,7 +16,6 @@ func TestDiskUsage(t *testing.T) {
 	runtime := testNewRuntime(t)
 	ctx := context.Background()
 
-	const expectedTotalImageSize int64 = 5847966
 	name := "quay.io/libpod/alpine:3.10.2"
 	pullOptions := &PullOptions{}
 	pulledImages, err := runtime.Pull(ctx, name, config.PullPolicyAlways, pullOptions)
@@ -31,19 +30,19 @@ func TestDiskUsage(t *testing.T) {
 	manifest, _, err := img.GetManifest(ctx, nil)
 	require.NoError(t, err)
 
+	res, size, err := runtime.DiskUsage(ctx)
+	require.NoError(t, err)
+	require.Len(t, res, 1)
+	initialTotalImageSize := size
+
 	expectedImageDiskUsage := ImageDiskUsage{
 		ID:         imgID,
 		Repository: "quay.io/libpod/alpine",
 		Tag:        "3.10.2",
 		SharedSize: 0,
-		UniqueSize: expectedTotalImageSize,
-		Size:       expectedTotalImageSize,
+		UniqueSize: initialTotalImageSize,
+		Size:       initialTotalImageSize,
 	}
-
-	res, size, err := runtime.DiskUsage(ctx)
-	require.NoError(t, err)
-	require.Equal(t, expectedTotalImageSize, size)
-	require.Len(t, res, 1)
 
 	// intentionally unsetting the time here, we cannot really equal the time
 	// because of the local information that is part of the struct and that
@@ -64,7 +63,7 @@ func TestDiskUsage(t *testing.T) {
 	img2, err := runtime.store.CreateImage("", []string{"localhost/test:123"}, layerID, "", opts)
 	require.NoError(t, err)
 
-	const sharedSize int64 = 5843968
+	sharedSize := initialTotalImageSize - int64(len(manifest))
 	// copy the expected and update the expected values
 	expectedImageDiskUsage2 := ImageDiskUsage{
 		ID:         img2.ID,
@@ -79,7 +78,7 @@ func TestDiskUsage(t *testing.T) {
 
 	res, size, err = runtime.DiskUsage(ctx)
 	require.NoError(t, err)
-	require.Equal(t, expectedTotalImageSize+int64(len(manifest)), size)
+	require.Equal(t, initialTotalImageSize+int64(len(manifest)), size)
 	require.Len(t, res, 2)
 	res[0].Created = time.Time{}
 	res[1].Created = time.Time{}
