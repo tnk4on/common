@@ -110,12 +110,11 @@ func readFileOrDir(root, name string, parentMode os.FileMode) ([]subscriptionDat
 }
 
 func getHostSubscriptionData(hostDir string, mode os.FileMode) ([]subscriptionData, error) {
-	var allSubscriptions []subscriptionData
 	hostSubscriptions, err := readAll(hostDir, "", mode)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read subscriptions from %q: %w", hostDir, err)
 	}
-	return append(allSubscriptions, hostSubscriptions...), nil
+	return hostSubscriptions, nil
 }
 
 func getMounts(filePath string) []string {

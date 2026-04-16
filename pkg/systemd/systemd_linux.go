@@ -102,7 +102,7 @@ func MovePauseProcessToScope(pausePidPath string) {
 
 // RunUnderSystemdScope adds the specified pid to a systemd scope
 func RunUnderSystemdScope(pid int, slice string, unitName string) error {
-	var properties []systemdDbus.Property
+	properties := make([]systemdDbus.Property, 0, 4)
 	var conn *systemdDbus.Conn
 	var err error
 

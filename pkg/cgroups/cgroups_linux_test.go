@@ -45,8 +45,8 @@ func TestResources(t *testing.T) {
 		return
 	}
 
-	wtDevices := []*cgroups.WeightDevice{}
-	devices := []*cgroups.ThrottleDevice{}
+	wtDevices := make([]*cgroups.WeightDevice, 0, 1)
+	devices := make([]*cgroups.ThrottleDevice, 0, 2)
 	dev1 := cgroups.NewThrottleDevice(1, 3, 2097152)
 	dev2 := cgroups.NewThrottleDevice(3, 10, 2097152)
 	dev3 := cgroups.NewWeightDevice(5, 9, 500, 0)

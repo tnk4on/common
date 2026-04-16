@@ -399,7 +399,8 @@ var _ = Describe("Config Local", func() {
 		gomega.Expect(config.GetDefaultEnv()).To(gomega.BeEquivalentTo(envs))
 		t.Setenv("HTTP_PROXY", "localhost")
 		t.Setenv("FOO", "BAR")
-		newenvs := []string{"HTTP_PROXY=localhost"}
+		newenvs := make([]string, 0, 1+len(envs))
+		newenvs = append(newenvs, "HTTP_PROXY=localhost")
 		envs = append(newenvs, envs...)
 		gomega.Expect(config.GetDefaultEnv()).To(gomega.BeEquivalentTo(envs))
 		config.Containers.HTTPProxy = false

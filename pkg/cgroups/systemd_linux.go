@@ -28,10 +28,6 @@ func systemdCreate(resources *cgroups.Resources, path string, c *systemdDbus.Con
 
 	var lastError error
 	for i := range 2 {
-		properties := []systemdDbus.Property{
-			systemdDbus.PropDescription("cgroup " + name),
-			systemdDbus.PropWants(slice),
-		}
 		var ioString string
 		v2, _ := IsCgroup2UnifiedMode()
 		if v2 {
@@ -49,6 +45,18 @@ func systemdCreate(resources *cgroups.Resources, path string, c *systemdDbus.Con
 			pMap["Delegate"] = true
 		}
 
+		uMap, sMap, bMap, iMap, structMap, err := resourcesToProps(resources, v2)
+		if err != nil {
+			lastError = err
+			continue
+		}
+
+		properties := make([]systemdDbus.Property, 0, 2+len(pMap)+len(uMap)+len(sMap)+len(bMap)+len(iMap)+len(structMap))
+		properties = append(properties,
+			systemdDbus.PropDescription("cgroup "+name),
+			systemdDbus.PropWants(slice),
+		)
+
 		for k, v := range pMap {
 			p := systemdDbus.Property{
 				Name:  k,
@@ -57,11 +65,6 @@ func systemdCreate(resources *cgroups.Resources, path string, c *systemdDbus.Con
 			properties = append(properties, p)
 		}
 
-		uMap, sMap, bMap, iMap, structMap, err := resourcesToProps(resources, v2)
-		if err != nil {
-			lastError = err
-			continue
-		}
 		for k, v := range uMap {
 			p := systemdDbus.Property{
 				Name:  k,

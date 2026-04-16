@@ -59,7 +59,7 @@ func TestFilterReference(t *testing.T) {
 		"localhost/a:tag",
 		"localhost/aa:tag",
 	}
-	allNames := []string{}
+	allNames := make([]string, 0, len(allBusyBoxNames)+len(allAlpineNames))
 	allNames = append(allNames, allBusyBoxNames...)
 	allNames = append(allNames, allAlpineNames...)
 

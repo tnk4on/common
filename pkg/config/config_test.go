@@ -684,10 +684,8 @@ image_copy_tmp_dir="storage"`
 				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 				return conf
 			}
-			configs := []string{
-				"test1",
-				"test2",
-			}
+			configs := make([]string, 0, 6)
+			configs = append(configs, "test1", "test2")
 			newConfigs, err := addConfigs("/bogus/path", configs)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			gomega.Expect(newConfigs).To(gomega.Equal(configs))
