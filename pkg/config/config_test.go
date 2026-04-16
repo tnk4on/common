@@ -53,6 +53,8 @@ var _ = Describe("Config", func() {
 			gomega.Expect(path).To(gomega.BeEquivalentTo("/var/tmp"))
 			gomega.Expect(defaultConfig.Engine.Retry).To(gomega.BeEquivalentTo(3))
 			gomega.Expect(defaultConfig.Engine.RetryDelay).To(gomega.Equal(""))
+			gomega.Expect(defaultConfig.Machine.FEXCodeCache).To(gomega.BeTrue())
+			gomega.Expect(defaultConfig.Machine.FEXEmu).To(gomega.BeTrue())
 		})
 
 		It("should succeed with devices", func() {
